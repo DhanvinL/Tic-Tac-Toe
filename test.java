@@ -1,5 +1,5 @@
 public class test {
     public static void main(String[] args){
-        System.out.print("it works");q
+        System.out.print("it works");
     }
 }
