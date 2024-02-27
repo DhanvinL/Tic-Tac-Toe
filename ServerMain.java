@@ -9,26 +9,42 @@ public class ServerMain
     {
         try
         {
-            // Creates a sever socket that will allow clients to connect
-            ServerSocket serverSocket = new ServerSocket(8000);
+            // creates a socket that allows connections on port 8001
+            ServerSocket serverSocket = new ServerSocket(8001);
 
-            while(true)
-            {
-                // creates a connection to the client
-                Socket socket = serverSocket.accept();
+            // allow X to connect and build streams to / from X
+            Socket xCon = serverSocket.accept();
+            ObjectOutputStream xos = new ObjectOutputStream(xCon.getOutputStream());
+            ObjectInputStream xis = new ObjectInputStream(xCon.getInputStream());
 
-                // creates a stream for writing objects to the client
-                ObjectOutputStream os = new ObjectOutputStream(socket.getOutputStream());
-                // creates a stream for reading objects from the client
-                ObjectInputStream is = new ObjectInputStream(socket.getInputStream());
+            // Lets the client know they are the X player
+            xos.writeObject(new CommandFromServer(CommandFromServer.CONNECTED_AS_X,null));
+            System.out.println("X has Connected.");
 
-                // creates a Thread for echoing to this client
-                Thread t = new Thread(new ServersListener(is,os));
-                // starts the thread (calls run)
-                t.start();
-            }
+            // Creates a Thread to listen to the X client
+            ServersListener sl = new ServersListener(xis,xos,'X');
+            Thread t = new Thread(sl);
+            t.start();
+
+            // allow O to connect and build streams to / from O
+            Socket oCon = serverSocket.accept();
+            ObjectOutputStream oos = new ObjectOutputStream(oCon.getOutputStream());
+            ObjectInputStream ois = new ObjectInputStream(oCon.getInputStream());
+
+            // Lets the client know they are the X player
+            oos.writeObject(new CommandFromServer(CommandFromServer.CONNECTED_AS_O,null));
+            System.out.println("O has Connected.");
+
+            // Creates a Thread to listen to the X client
+            sl = new ServersListener(ois,oos,'O');
+            t = new Thread(sl);
+            t.start();
+
+
+            xos.writeObject(new CommandFromServer(CommandFromServer.X_TURN,null));
+            oos.writeObject(new CommandFromServer(CommandFromServer.X_TURN,null));
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }

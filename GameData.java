@@ -16,7 +16,7 @@ public class GameData
                 grid[r][c]=' ';
     }
 
-   
+
     public boolean isCat()
     {
         if(grid[0][0] !=' ' && grid[0][1] !=' ' && grid[0][2] !=' '
